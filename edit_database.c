@@ -259,11 +259,9 @@ void search_record_by_name_pattern(char *name)
 void search_record_by_name(char *name)
 {
     people_t *person = list_of_people->head;
-
     address_t *address = NULL;
 
     int items_found = 0, index = 0;
-
     for(; index < list_of_people->item_counter; index++)
     {
         if(strcmp(person->name, name) == 0)
@@ -326,6 +324,7 @@ void delete_record_from_people_list(char *name)
 
             list_of_people->item_counter--;
         }
+
         delete_person = next_person;
     }
 
@@ -338,7 +337,6 @@ int check_connect_btwn_address_person(address_t *address)
     people_t *person = list_of_people->head;
 
     int ret = 0;
-
     while(person != NULL)
     {
         if(person->addrs_point == address)
@@ -396,13 +394,14 @@ void delete_record_from_address_list(char *street_name, int home_num)
                 (delete_address->next)->prev = delete_address->prev;
             }
 
+            list_of_address->item_counter--;
+
             free(delete_address->street_name);
             free(delete_address);
 
-            list_of_address->item_counter--;
-
             break;
         }
+
         delete_address = delete_address->next;
     }
 
@@ -419,7 +418,44 @@ FILE *save_address_to_file(char *file_path, FILE *file)
         fprintf(file, "%s,%d\n", address->street_name, address->home_num);
         address = address->next;
     }
+
     printf("Addresses are saved to a file %s\n", file_path);
+}
+
+int check_file(char const *file_path)
+{
+    FILE *file;
+
+    file = fopen(file_path, "r");
+    if(file == NULL)
+    {
+        printf(" Сouldn't open the file!\n"
+            " Please try again another time.\n");
+        return 0;
+    }
+
+    char street_name[32], home_num[8];
+    int ret = 0;
+
+    while(fscanf(file, "%[^,],%s\n", street_name, home_num) != EOF)
+    {
+        ret = atoi(home_num);
+        if(ret_home_num != 0)
+            add_new_address(street_name, ret_home_num);
+        else 
+        {
+            printf("ERROR! The database contains incorrect data.\n"
+                "Please try again another time!\n");
+
+            clear_list_of_address();
+
+            fclose(file);
+            return 0;
+        }
+    }
+
+    fclose(file);
+    return 1;
 }
 
 /*Функция обработки команды*/
@@ -690,7 +726,6 @@ int main(int argc, char const *argv[])
 {
     FILE *file;
     char const *file_path;
-
     if(argc == 2)
         file_path = argv[1];
     else
@@ -699,52 +734,18 @@ int main(int argc, char const *argv[])
     list_of_people = calloc(1,sizeof(list_people_t));
     list_of_address = calloc(1,sizeof(list_address_t));
 
-/*Сделать отдельную функцию*/
-    file = fopen(file_path, "r");
-    if(file == NULL)
-    {
-        printf(" Сouldn't open the file!\n"
-            " Please try again another time.\n");
-
+    if(check_file(file_path) == 0)
         return 0;
-    }
 
-    char street_name[32], home_num[8];
-    int ret_home_num = 0;
-
-    while(fscanf(file, "%[^,],%s\n", street_name, home_num) != EOF)
-    {
-        ret_home_num = atoi(home_num);
-        if(ret_home_num != 0)
-            add_new_address(street_name, ret_home_num);
-        else 
-        {
-            printf("ERROR! The database contains incorrect data.\n"
-                "Please try again another time!\n");
-
-            clear_list_of_address();
-
-            fclose(file);
-            return 0;
-        }
-    }
-
-    fclose(file);
-/**/
-
-    printf("*** Welcome to the people database editor! ***\n");
+    printf("*** Welcome to the people database editor! ***\n"
+        " You are editing a file: %s\n"
+        " Enter the 'show commands' command to view the command reference.\n", file_path);
 
     int cmd_num = 0;
-
-    printf(" Enter the 'show commands' command to view the command reference.");
-    /*Команды*/
     while(cmd_num != CMD_EXIT)
     {
-        printf("\n You are editing a file: %s", file_path);
         cmd_num = processing_of_command_name();
-        path = command_execution(cmd_num, file_path);
-
-        file_path = path;
+        command_execution(cmd_num);
     }
 
     free(list_of_people);
