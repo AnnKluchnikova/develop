@@ -1,0 +1,9 @@
+Ann Kluchnikova,21,O.Koshevoy,27
+Alex Arefev,20,Zolotaya Niva,15
+Vladimir Kan,22,Istoricheskaya,34
+Aleksey Sokolov,22,Donskogo,16
+Anastasya Vidrina,21,K.Marksa,20
+Marina Kuksa,43,Jeleznodorojnaya,17
+Vadim Vender,36,Krasniy,56
+Vladimir Kluchnikova,21,O.Koshevoy,27
+Sofa Porjena,29,1905 goda,67
