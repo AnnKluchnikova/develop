@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_FILE "./people.txt"
+#define DEFAULT_FILE "./database.txt"
 
 enum CMD {
     CMD_SHOW_CMD = 1,
@@ -92,6 +92,7 @@ address_t *add_new_address(char *street_name, int home_num)
     }
 
     list_of_address->tail = new_address;
+
     return new_address;
 }
 
@@ -123,6 +124,7 @@ void view_all_lists()
     if(list_of_people->head == NULL)
     {
         printf("ERROR! No records!\n");
+
         return;
     }
 
@@ -130,6 +132,7 @@ void view_all_lists()
     address_t *address = NULL;
 
     int index = 0;
+
     while(person != NULL)
     {
         printf("%d. Name: %s, Age: %u ",
@@ -155,12 +158,14 @@ void view_list_of_address()
     if(list_of_address->head == NULL)
     {
         printf("ERROR! No records!\n");
+
         return;
     }
 
     address_t *address = list_of_address->head;
 
     int index = 0;
+
     while(address != NULL)
     {
 
@@ -178,6 +183,9 @@ void view_list_of_address()
 /*Очистка списка адресов*/
 void clear_list_of_address()
 {
+    if(list_of_address->head == NULL)
+        return;
+
     address_t *address = NULL;
 
     while(list_of_address->head != NULL)
@@ -196,6 +204,9 @@ void clear_list_of_address()
 /*Очистка списка людей*/
 void clear_list_of_people()
 {
+    if(list_of_people->head == NULL)
+        return;
+
     people_t *person = NULL;
 
     while(list_of_people->head != NULL)
@@ -214,23 +225,14 @@ void clear_list_of_people()
 /*Полная очистка списка*/
 void clear_all_lists()
 {
-    if(list_of_people->head == NULL)
-    {
-        printf("ERROR! No records!\n");
-        return;
-    }
-
     clear_list_of_people();
     clear_list_of_address();
-
-    printf("Ready! Database cleared.\n");
 }
 
 /*Поиск элемента по частичному совпадению с именем*/
 void search_record_by_name_pattern(char *name)
 {
     people_t *person = list_of_people->head;
-
     address_t *address = NULL;
 
     int len = strlen(name);
@@ -256,12 +258,29 @@ void search_record_by_name_pattern(char *name)
 }
 
 /*Поиск элемента*/
-void search_record_by_name(char *name)
+void search_record_by_name()
 {
+    if(list_of_people->head == NULL)
+    {
+        printf("ERROR! No records!\n");
+
+        return;
+    }
+/*Часть подлежащая замене*/
+    char name[32];
+    int ret = 0;
+
+    printf("\nEnter a name: ");
+    ret = scanf("%s",name);
+
+    if(ret == 0)
+        return;
+/**/
     people_t *person = list_of_people->head;
     address_t *address = NULL;
 
     int items_found = 0, index = 0;
+
     for(; index < list_of_people->item_counter; index++)
     {
         if(strcmp(person->name, name) == 0)
@@ -287,8 +306,22 @@ void search_record_by_name(char *name)
 }
 
 /*Удаление элемента по имени, без затрагивания списка адресов*/
-void delete_record_from_people_list(char *name)
+void delete_record_from_people_list()
 {
+    if(list_of_people->head == NULL)
+    {
+        printf("ERROR! No records!\n");
+        return;
+    }
+/*Часть подлежащая замене*/
+    char name[32];
+    int ret = 0;
+    printf("\nEnter a name: ");
+    ret = scanf("%s",name);
+
+    if(ret == 0)
+        return;
+/**/
     people_t *delete_person = list_of_people->head;
     people_t *next_person = NULL;
 
@@ -301,6 +334,7 @@ void delete_record_from_people_list(char *name)
             if((delete_person == list_of_people->head)&&(delete_person == list_of_people->tail))
             {
                 clear_list_of_people();
+
                 break;
             }
             else if(delete_person == list_of_people->head)
@@ -327,8 +361,6 @@ void delete_record_from_people_list(char *name)
 
         delete_person = next_person;
     }
-
-    printf("\n Ready! The person's record is removed.\n");
 }
 
 /*Проверка на отсутствие связей между адресом и людьми*/
@@ -337,6 +369,7 @@ int check_connect_btwn_address_person(address_t *address)
     people_t *person = list_of_people->head;
 
     int ret = 0;
+
     while(person != NULL)
     {
         if(person->addrs_point == address)
@@ -349,21 +382,46 @@ int check_connect_btwn_address_person(address_t *address)
 }
 
 /*Удаление элемента по имени из списка адресов*/
-void delete_record_from_address_list(char *street_name, int home_num)
+void delete_record_from_address_list()
 {
-    address_t *address = check_address_matches(street_name, home_num);
+    if(list_of_address->head == NULL)
+    {
+        printf("ERROR! No records!\n");
+
+        return;
+    }
+/*Часть подлежащая замене*/
+    char street_name[32], home_num[8];
+    int ret = 0;
+
+    printf("\nEnter a street name: ");
+    scanf("%s", street_name);
+    printf("Enter a house number: ");
+    scanf("%s", home_num);
+
+    ret = atoi(home_num);
+    if(ret == 0)
+    {
+        printf("\nIncorrect data! Try again, please.\n");
+
+        return;
+    }
+/**/
+    address_t *address = check_address_matches(street_name, ret);
 
     if(address != NULL)
     {
         if(check_connect_btwn_address_person(address) != 0)
         {
             printf("\n ERROR! There are people with this address.\n");
+
             return;
         }
     }
     else
     {
         printf("\n ERROR! There is no such address!\n");
+
         return;
     }
 
@@ -376,6 +434,7 @@ void delete_record_from_address_list(char *street_name, int home_num)
             if((delete_address == list_of_address->head)&&(delete_address == list_of_address->tail))
             {
                 clear_list_of_address();
+
                 break;
             }
             else if(delete_address == list_of_address->head)
@@ -404,70 +463,143 @@ void delete_record_from_address_list(char *street_name, int home_num)
 
         delete_address = delete_address->next;
     }
-
-    printf("\n Ready! The address is removed.\n");
 }
 
-/*Функция добавления в файл*/
-FILE *save_address_to_file(char *file_path, FILE *file)
-{
-    address_t *address = list_of_address->head;
-
-    while(address != NULL)
-    {
-        fprintf(file, "%s,%d\n", address->street_name, address->home_num);
-        address = address->next;
-    }
-
-    printf("Addresses are saved to a file %s\n", file_path);
-}
-
-int check_file(char const *file_path)
+/*Функция проверки доступности файла и проверки его содержимого*/
+int read_file(char const *file_path)
 {
     FILE *file;
 
     file = fopen(file_path, "r");
     if(file == NULL)
     {
-        printf(" Сouldn't open the file!\n"
-            " Please try again another time.\n");
-        return 0;
+        printf("\n Сouldn't open the file!\n"
+            " Please try again later.\n");
+
+        return -1;
     }
+/*Создать новую функцию проверки содержимого файла*/
+    char name[64], age[16], street_name[64], home_num[16];
+    int ret_age = 0, ret_home_num = 0;
 
-    char street_name[32], home_num[8];
-    int ret = 0;
-
-    while(fscanf(file, "%[^,],%s\n", street_name, home_num) != EOF)
+    while(fscanf(file, "%[a-zA-z ],%[^,],%[^,],%s\n", name, age, street_name, home_num) != EOF)
     {
-        ret = atoi(home_num);
-        if(ret_home_num != 0)
-            add_new_address(street_name, ret_home_num);
-        else 
+        ret_age = atoi(age);
+        if (ret_age != 0)
         {
-            printf("ERROR! The database contains incorrect data.\n"
-                "Please try again another time!\n");
+            ret_home_num = atoi(home_num);
+            if(ret_home_num != 0)
+                add_new_person(name, ret_age, street_name, ret_home_num);
+            else 
+            {
+                printf("\n ERROR! The database contains incorrect data.\n"
+                    " Please try again later.\n");
 
-            clear_list_of_address();
+                clear_all_lists();
 
-            fclose(file);
+                fclose(file);
+
+                return -1;
+            }
+        }
+    }
+/**/
+    fclose(file);
+
+    return 0;
+}
+
+/*Функция для считывания данных пользователя*/
+/*void read_data()
+{
+}*/
+
+/*Функция считывания данных пользователя*/
+int read_user_data()
+{
+    char name[64], age[16], street_name[64], home_num[16];
+    int ret_age = 0, ret_home_num = 0;
+
+    printf("\nEnter information about the person\n"
+            " Name: ");
+    scanf("%[a-zA-z ]", name);
+    printf(" Age: ");
+    scanf("%s", age);
+/*Создать новую функцию для проверки введеднных данных пользователя*/
+    ret_age = atoi(age);
+    if (ret_age != 0)
+    {
+        printf("\nEnter the person's address\n Street: ");
+        scanf("%s", street_name);
+        printf(" Нouse number: ");
+        scanf("%s", home_num);
+
+        ret_home_num = atoi(home_num);
+        if(ret_home_num != 0)
+        {
+            add_new_person(name, ret_age, street_name, ret_home_num);
+
             return 0;
         }
     }
+/**/
+    printf("\nIncorrect data! Try again, please.\n");
+
+    return -1;
+}
+
+/*Функция сохранения изменений в файл*/
+void save_to_file(char const *file_path)
+{
+    FILE *file;
+    file = fopen(file_path,"w");
+
+    if(file == NULL)
+    {
+        printf("ERROR! Failed to save!\n");
+
+        return;
+    }
+
+    people_t *person = list_of_people->head;
+    address_t *address = NULL;
+
+    while(person != NULL)
+    {
+        address = person->addrs_point;
+        fprintf(file, "%s,%d,%s,%d\n", person->name, person->age, address->street_name, address->home_num);
+
+        person = person->next;
+    }
 
     fclose(file);
-    return 1;
+
+    printf("Changes are saved to a file %s\n", file_path);
+}
+
+/*Проверка сохранения перед выходом из программы*/
+void question_about_save(char const *file_path)
+{
+    char answer[4];
+
+    printf("\n Save changes? y/n\n");
+    scanf("%s", answer);
+
+    if(strcmp(answer,"y") == 0)
+        save_to_file(file_path);
 }
 
 /*Функция обработки команды*/
 int processing_of_command_name()
 {
+/*Сделать надежный ввод*/
     char user_message[32];
     memset(user_message, ' ', 5);
 
     printf("\n >");
     scanf("%[a-z ]", user_message);
     __fpurge(stdin);
-
+/**/
     if(strcmp(user_message,"show commands") == 0)
         return CMD_SHOW_CMD;
     else if (strcmp(user_message,"get persons") == 0)
@@ -486,246 +618,68 @@ int processing_of_command_name()
         return CMD_DELETE_PERSON;
     else if (strcmp(user_message,"delete address") == 0)
         return CMD_DELETE_ADDRESS;
-    /*else if (strcmp(user_message,"import address") == 0)
-        return CMD_IMPORT_ADDRESS_FROM_FILE;*/
     else if (strcmp(user_message,"save address") == 0)
         return CMD_SAVE_ADDRESS_IN_FILE;
 
-    return 0;
+    return -1;
 }
 
-char *command_execution(int cmd_num, char *file_path)
+void command_execution(int cmd_num, char const *file_path)
 {
-    char user_message[8], name[32], street_name[32];
-    int ret_age = 0, ret_home_num = 0;
-
     switch(cmd_num)
     {
         case CMD_SHOW_CMD: /*Вывод справочника команд*/
-        {
             printf("\nshow commands\n"
-                "add person\n"
-                "find person\n"
-                "get persons\n"
-                "delete person\n"
-                "get address\n"
-                "delete address\n"
-//                "import address\n"
-                "save address\n"
-                "delete database\n"
-                "exit\n");
+                   "add person\n"
+                   "find person\n"
+                   "get persons\n"
+                   "delete person\n"
+                   "get address\n"
+                   "delete address\n"
+                   "save address\n"
+                   "delete database\n"
+                   "exit\n");
             break;
-        }
-
         case CMD_GET_ALL_LISTS: /*Вывод списка на экран*/
-        {
             view_all_lists();
             break;
-        }
-
         case CMD_CLEAR_ALL_LISTS: /*Полная очистка списка*/
-        {
             clear_all_lists();
             break;
-        }
-
         case CMD_ADD_LIST_ITEM: /*Добавление нового элемента*/
-        {
-            printf("\nEnter information about the person\n"
-                " Name: ");
-            scanf("%s", name);
-            printf(" Age: ");
-            scanf("%s", user_message);
-
-            ret_age = atoi(user_message);
-            if (ret_age != 0)
-            {
-                printf("\nEnter the person's address\n Street: ");
-                scanf("%s", street_name);
-                printf(" Нouse number: ");
-                scanf("%s", user_message);
-
-                ret_home_num = atoi(user_message);
-                if(ret_home_num != 0)
-                    add_new_person(name, ret_age, street_name, ret_home_num);
-                else
-                    printf("\nIncorrect data! Try again, please.\n");
-            }
-            else
-                printf("\nIncorrect data! Try again, please.\n");
-
+            read_user_data();
             break;
-        }
-
         case CMD_FIND_RECORD_BY_NAME: /*Поиск элемента*/
-        {
-            if(list_of_people->head == NULL)
-            {
-                printf("ERROR! No records!\n");
-            }
-            else
-            {
-                printf("\nEnter a name: ");
-                scanf("%s",name);
-
-                search_record_by_name(name);
-            }
-
+            search_record_by_name();
             break;
-        }
-
         case CMD_EXIT: /*Выход из программы*/
-        {
-            if(list_of_people->head != NULL)
-                clear_list_of_people();
-            if(list_of_address->head != NULL)
-                clear_list_of_address();
-
+            question_about_save(file_path);
+            clear_all_lists();
             break;
-        }
-
         case CMD_GET_ADDRESS_LIST: /*Вывод адресов*/
-        {
             view_list_of_address();
             break;
-        }
-
         case CMD_DELETE_PERSON: /*Удаление человека из списка*/
-        {
-            if(list_of_people->head != NULL)
-            {
-                printf("\nEnter a name: ");
-                scanf("%s", name);
-
-                delete_record_from_people_list(name);
-            }
-            else
-                printf("No element!\n");
-
+            delete_record_from_people_list();
             break;
-        }
-
         case CMD_DELETE_ADDRESS: /*Удаление адреса из списка*/
-        {
-            if(list_of_address->head != NULL)
-            {
-                printf("\nEnter a street name: ");
-                scanf("%s", street_name);
-                printf("Enter a house number: ");
-                scanf("%s", user_message);
-
-                ret_home_num = atoi(user_message);
-                if(ret_home_num != 0)
-                    delete_record_from_address_list(street_name, ret_home_num);
-                else
-                    printf("\nIncorrect data! Try again, please.\n");
-            }
-            else
-                printf("ERROR! No records!\n");
-
+            delete_record_from_address_list();
             break;
-        }
-
-/*        case CMD_IMPORT_ADDRESS_FROM_FILE:
-        {
-            char home_num[8];
-
-            file =fopen(DEFAULT_ADDRESS_FILE, "r");
-            while(file == NULL)
-            {
-                printf("\nEnter the file name and path:\n");
-                scanf("%s", file_path);
-
-                file = fopen(file_path, "r");
-            }
-
-            while(fscanf(file, "%[^,],%s\n", street_name, home_num) != EOF)
-            {
-                ret_home_num = atoi(home_num);
-                if(ret_home_num != 0)
-                    add_new_address(street_name, ret_home_num);
-                else 
-                {
-                    printf("ERROR! The database contains incorrect data.\n");
-                    clear_list_of_address();
-                    break;
-                }
-            }
-
-            fclose(file);
-            __fpurge(stdin);
-
-            break;
-        }*/
-
         case CMD_SAVE_ADDRESS_IN_FILE:
-        {
-            FILE *file;
-
-            printf("Save changes to the current file? y/n\n");
-            scanf("%s", user_message);
-
-            if(strcmp(user_message,"y") == 0)
-            {
-                file = fopen(file_path,"w");
-                if(file != NULL)
-                {
-                    save_address_to_file(file_path, file);
-                    fclose(file);
-                }
-            }
-            else if (strcmp(user_message,"n") == 0)
-            {
-                char new_file_path[128];
-
-                printf("Enter the full name of the new file:\n");
-                scanf("%s", new_file_path);
-
-                file = fopen(new_file_path,"a");
-                if(file != NULL)
-                {
-                    save_address_to_file(new_file_path, file);
-                    fclose(file);
-
-                    file_path = strdup(new_file_path);
-                }
-            }
-            else
-            {
-                printf("Invalid command! Try again, please.\n");
-                break;
-            }
-
+            save_to_file(file_path);
             break;
-        }
-
-        /*case CMD_IMPORT_DATABASE_FROM_FILE:
-        {
-            while(fscanf(file, "%[a-zA-z ],%[^,],%[^,],%s\n", street_name, home_num) != EOF)
-                printf("Name: %s, Age: %d, Street: %s, House number: %d\n",
-                    name,
-                    ret_age,
-                    street_name,
-                    ret_home_num);
-        }*/
-
         default:
-        {
             printf(" Invalid command! Try again, please.\n"
                 "Enter the 'show cmd' command to view the command reference.\n");
             break;
-        }
     }
-
-    __fpurge(stdin);
-    return file_path;
 }
 
 /*Головная фунция*/
 int main(int argc, char const *argv[])
 {
-    FILE *file;
     char const *file_path;
+
     if(argc == 2)
         file_path = argv[1];
     else
@@ -734,18 +688,19 @@ int main(int argc, char const *argv[])
     list_of_people = calloc(1,sizeof(list_people_t));
     list_of_address = calloc(1,sizeof(list_address_t));
 
-    if(check_file(file_path) == 0)
-        return 0;
-
-    printf("*** Welcome to the people database editor! ***\n"
-        " You are editing a file: %s\n"
-        " Enter the 'show commands' command to view the command reference.\n", file_path);
-
-    int cmd_num = 0;
-    while(cmd_num != CMD_EXIT)
+    if(read_file(file_path) == 0)
     {
-        cmd_num = processing_of_command_name();
-        command_execution(cmd_num);
+        int cmd_num = 0;
+
+        printf("\n*** Welcome to the people database editor! ***\n"
+            " You are editing a file: %s\n"
+            " Enter the 'show commands' command to view the command reference.\n", file_path);
+
+        while(cmd_num != CMD_EXIT)
+        {
+            cmd_num = processing_of_command_name();
+            command_execution(cmd_num, file_path);
+        }
     }
 
     free(list_of_people);

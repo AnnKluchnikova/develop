@@ -1,0 +1,47 @@
+Примеры входных данных для работы с программой edit_database.c
+
+Формат файла
+database.txt
+database
+
+Формат данных в файле
+"Корректный"
+Ann Kluchnikova,21,O.Koshevoy,27
+
+"Не корректный"
+Ann Kluchnikova 21 O.Koshevoy 27
+21,Ann Kluchnikova,O.Koshevoy,27
+Ann,five,Krasniy,8
+Ann,5,Krasniy,eight
+Ann,five,Krasniy,eight
+,,O.Koshevoy,27
+21,21,21,21
+21 21 21 21
+Ann Kluchnikova,21,,
+
+Запуск программы через консоль
+./edit
+./edit ./database.txt
+./edir /home/ann/mygit/develop/database.txt 
+./edit 5 56 7 3578 wefer
+./edit ./database.txt ./database_1.txt ./database_2.txt
+./edit ./не_существующий_файл
+./edir /home/ann/mygit/develop/не_существующий_файл
+
+Работа в командной строке внутри программы
+"Читаемые команды"
+add person
+find person
+get persons
+delete person
+get address
+delete address
+save address
+delete database
+exit
+
+"Любой другой набор будет считаться неккоректным"
+exit exit
+356
+rwgerg
+!0):*
