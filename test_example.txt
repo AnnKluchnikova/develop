@@ -1,12 +1,15 @@
 Примеры входных данных для работы с программой edit_database.c
 
-Формат файла
+НАЧАЛЬНЫЙ ВАРИАНТ ФАЙЛА
+
+***Формат файла***
 database.txt
 database
 
-Формат данных в файле
+***Формат данных в файле***
 "Корректный"
 Ann Kluchnikova,21,O.Koshevoy,27
+Пустой файл
 
 "Не корректный"
 Ann Kluchnikova 21 O.Koshevoy 27
@@ -19,7 +22,9 @@ Ann,five,Krasniy,eight
 21 21 21 21
 Ann Kluchnikova,21,,
 
-Запуск программы через консоль
+РАБОТА С КОНСОЛЬЮ
+
+***Запуск программы через консоль***
 ./edit
 ./edit ./database.txt
 ./edir /home/ann/mygit/develop/database.txt 
@@ -28,20 +33,100 @@ Ann Kluchnikova,21,,
 ./edit ./не_существующий_файл
 ./edir /home/ann/mygit/develop/не_существующий_файл
 
-Работа в командной строке внутри программы
+***Работа в командной строке внутри программы***
 "Читаемые команды"
+show commands
 add person
 find person
 get persons
 delete person
 get address
 delete address
-save address
+save database
 delete database
 exit
 
-"Любой другой набор будет считаться неккоректным"
+"Любой другой набор любой длины будет считаться неккоректным"
+перевод на новую строку (нажатие на Enter)
 exit exit
 356
 rwgerg
 !0):*
+
+РАБОТА С КОМАНДАМИ В ЗАПУЩЕННОЙ ПРОГРАММЕ
+
+КОМАНДА: 
+ФУНКЦИЯ: 
+№1
+КОМАНДА: add person
+ФУНКЦИЯ: add_new_person (также включает add_new_address, check_address_matches)
+
+"Корректные данные"
+Для name и street name: строка не длиннее 30 символов, при этом символ может быть любым, кроме "," или перевода строки,
+т.е. по сути пустой строки
+
+Примеры name :
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Ann Kluchnikova
+
+Примеры street name:
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+O.Koshevoy
+1905 goda
+
+Для age и home number: строка не длиннее 7 символов, при этом это могут быть только цифры
+Примеры:
+5555555
+245
+
+№2
+КОМАНДА: find person
+ФУНКЦИЯ: search_record_by_name (также включает search_record_by_name_pattern)
+
+"Корректные данные"
+Для name аналогично пункту №1
+
+№3
+КОМАНДА: get persons
+ФУНКЦИЯ: view_all_lists
+
+"Данные не запрашивает"
+
+№4
+КОМАНДА: delete person
+ФУНКЦИЯ: delete_record_from_people_list
+
+"Корректные данные"
+Для name аналогично пункту №1
+
+№5
+КОМАНДА: get address
+ФУНКЦИЯ: view_list_of_address
+
+"Данные не запрашивает"
+
+№6
+КОМАНДА: delete address
+ФУНКЦИЯ: delete_record_from_address_list
+
+"Корректные данные"
+Для street name и home number аналогично пункту №1
+
+№7
+КОМАНДА: save database
+ФУНКЦИЯ: save_to_file
+
+"Данные не запрашивает"
+
+№8
+КОМАНДА: delete database
+ФУНКЦИЯ: clear_all_lists (также включает clear_list_of_people, clear_list_of_address)
+
+"Данные не запрашивает"
+
+№9
+КОМАНДА: exit
+ФУНКЦИЯ: нет специальной функции, однако вызывает question_about_save, clear_all_lists
+
+"Корректные данные"
+При исполнении команды у пользователя спрашивается о сохранении данных. Можно ответить yes или no, при этом любые другие строки будут считаться некоректными данными и программа не будет завершаться.
