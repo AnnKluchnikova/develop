@@ -74,7 +74,7 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 O.Koshevoy
 1905 goda
 
-Для age и home number: строка не длиннее 7 символов, при этом это могут быть только цифры
+Для age и home number: строка не длиннее 6 символов, при этом это могут быть только цифры
 Примеры:
 5555555
 245
