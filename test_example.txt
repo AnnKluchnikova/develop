@@ -12,15 +12,17 @@ Ann Kluchnikova,21,O.Koshevoy,27
 Пустой файл
 
 "Не корректный"
+пустая строка
+ Ann Kluchnikova,21,O.Koshevoy,27
 Ann Kluchnikova 21 O.Koshevoy 27
 21,Ann Kluchnikova,O.Koshevoy,27
 Ann,five,Krasniy,8
 Ann,5,Krasniy,eight
 Ann,five,Krasniy,eight
-,,O.Koshevoy,27
+ , ,O.Koshevoy,27
 21,21,21,21
 21 21 21 21
-Ann Kluchnikova,21,,
+Ann Kluchnikova,21, , 
 
 РАБОТА С КОНСОЛЬЮ
 
@@ -62,8 +64,7 @@ rwgerg
 ФУНКЦИЯ: add_new_person (также включает add_new_address, check_address_matches)
 
 "Корректные данные"
-Для name и street name: строка не длиннее 30 символов, при этом символ может быть любым, кроме "," или перевода строки,
-т.е. по сути пустой строки
+Для name и street name: строка не длиннее 30 символов, при этом символ может быть любым, кроме "," или перевода строки, т.е. по сути пустой строки
 
 Примеры name :
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -74,7 +75,7 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 O.Koshevoy
 1905 goda
 
-Для age и home number: строка не длиннее 6 символов, при этом это могут быть только цифры
+Для age и home number: строка не длиннее 6 символов, при этом это могут быть только цифры, кроме этого первая цифра не может быть 0
 Примеры:
 5555555
 245
