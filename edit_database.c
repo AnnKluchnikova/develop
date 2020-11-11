@@ -5,11 +5,11 @@
 #include <ctype.h>
 
 #define DEFAULT_FILE "./database.txt"
-#define STRING 32
-#define NUMBER 8
+#define STRING_LEN 64
+#define NUMBER_LEN 8
 
 int change_flag = 0; // Счетчик изменений для запроса сохранения в файл,
-                       // если произошли какие-то изменения
+                       // если произошли какие-то изменения устанавливается флаг
 enum EXIT_FUNC {
     ERROR = -1,
     VALID
@@ -29,8 +29,7 @@ enum CMD {
     CMD_EXIT,
     CMD_GET_ADDRESS_LIST,
     CMD_DELETE_PERSON,
-    CMD_DELETE_ADDRESS,
-    CMD_SAVE_ADDRESS_IN_FILE,
+    CMD_SAVE_DATABASE_IN_FILE,
 };
 
 typedef struct address_s
@@ -52,7 +51,7 @@ typedef struct people_s
 {
     char *name;
     unsigned int age;
-    address_t *addrs_point;
+    address_t *address_point;
     struct people_s *next;
     struct people_s *prev;
 } people_t;
@@ -67,9 +66,30 @@ typedef struct list_people_s
 list_people_t *list_of_people;
 list_address_t *list_of_address;
 
+//________________________________________________________________________ЧТЕНИЕ И ОБРАБОТКА ДАННЫХ
+/*Функция для считывания данных*/
+int read_data(char *buf, int data_len)
+{
+    fgets(buf, data_len, stdin);
+    __fpurge(stdin);
 
-/*Функция для проверки данных*/
-int check_data(char *buf, int type_data)
+    char *trigger = strchr(buf, '\n'); // Избавление от символа конца строки необходимо
+                                      // во избежания проблем со сравнением данных,
+    if (trigger != NULL)             // т.к. сравниваемые данные в основном не имеют такого символа
+        *trigger = '\0';            // и могут отличаться только "\n" в конце строки
+    else
+        goto false_data;          // Но если в строке не найдется символа конца строки,
+                                 // значит строка была введена длиннее, чем ожидалось
+
+    return VALID;
+
+false_data:
+    printf("\nERROR! The string is longer than the expected size.\n");
+    return ERROR;
+}
+
+/*Функция для проверки непустоты строки*/
+int is_not_null_string(char *buf)
 {
     if(buf == NULL)        // Проверка на наличие пустой строки в непустом файле
         goto false_data;  // Без этого условия программа падает при обработке такой строки
@@ -82,39 +102,98 @@ int check_data(char *buf, int type_data)
     if(simbols == 0)
         goto false_data;
 
-    if((type_data == NUMBER)&&(strlen(buf) < NUMBER))
-        return VALID;
-    else if((type_data == STRING)&&(strlen(buf) < STRING))
-        return VALID;
+    return VALID;
 
 false_data:
+    printf("\nERROR! The string is empty.\n");
     return ERROR;
 }
 
-/*Функция для считывания данных*/
-int read_data(char *buf, int type_data)
+/*Функция проверки строковых данных на корректность*/
+int is_correct_string(char *buf)
 {
-    fgets(buf, type_data, stdin);
+    if(is_not_null_string(buf) != VALID)
+        return ERROR;
 
     if(strchr(buf, ',') != NULL)    // Запятая является разделителем между разными данными в файле
         goto false_data;           // Если она окажется в принимаемой строке, то при сохранении в файл и
                                   // считывании из этого файла данные будут восприниматься не корректно
 
-    char *trigger = strchr(buf, '\n'); // Избавление от символа конца строки необходимо
-                                      // во избежания проблем со сравнением данных,
-    if (trigger != NULL)             // т.к. сравниваемые данные в основном не имеют такого символа
-        *trigger = '\0';            // и могут отличаться только "\n" в конце строки
-    else
+    if(strlen(buf) >= STRING_LEN)
         goto false_data;
 
-    return check_data(buf, type_data);
+    return VALID;
 
 false_data:
+    printf("\nERROR! The string is longer than 63 characters or contains ','.\n");
     return ERROR;
 }
 
-/*Проверка на отсутствие повторений адреса*/
-address_t *check_address_matches(char *street_name, int home_num)
+/*Функция для распознования возраста "0 лет"*/
+int zero_is_age(char *buf)
+{
+    int index = 0;
+
+    while(index < strlen(buf))
+    {
+        if(buf[index] == '0')
+            return VALID;
+        index++;
+    }
+
+    return ERROR;
+}
+
+/*Функция для преобразования возраста из строки в число*/
+int get_age_as_number(char *buf)
+{
+    if(is_not_null_string(buf) != VALID)
+        return ERROR;
+
+    int get_number = atoi(buf);
+
+    if((get_number > 0)&&(get_number < 150)) // Самому старому человеку в мире было 145 лет
+        return get_number;
+    else if(get_number == 0)        // Возраст "0" соответсвует младенцу,
+        if(zero_is_age(buf) == VALID)  // не достигшему возраста 1 год
+            return get_number;
+
+    printf("\nERROR! Age doesn't match the real one.\n");
+    return ERROR;
+}
+
+/*Функция для преобразования номера дома из строки в число*/
+int get_home_num_as_number(char *buf)
+{
+    if(is_not_null_string(buf) != VALID)
+        goto false_data;
+
+    int get_number = atoi(buf);
+
+    if(get_number > 0)
+        return get_number;
+
+false_data:
+    printf("\nERROR! House number doesn't match the real one.\n");
+    return ERROR;
+}
+
+//________________________________________________________________________РАБОТА С БАЗОЙ
+/*Проверка базы на непустоту*/
+int not_empty_database()
+{
+    if(list_of_people->head == NULL)
+    {
+        printf("Attention! The database is empty.\n");
+        return ERROR;
+    }
+
+    return VALID;
+}
+
+//________________________________________________________________________ДОБАВЛЕНИЕ ЭЛЕМЕНТА
+/*Функция передачи указателя на уже существующий адрес*/
+address_t *get_existing_address(char *street_name, int home_num)
 {
     address_t *address = list_of_address->head;
 
@@ -132,7 +211,7 @@ address_t *check_address_matches(char *street_name, int home_num)
 /*Добавление записи в справочник адресов*/
 address_t *add_new_address(char *street_name, int home_num)
 {
-    address_t *ret = check_address_matches(street_name, home_num);
+    address_t *ret = get_existing_address(street_name, home_num);
 
     if(ret != NULL)
         return ret;
@@ -165,7 +244,7 @@ void add_new_person(char *name, unsigned int age, char *street_name, int home_nu
     list_of_people->item_counter++;
     new_person->name = strdup(name);
     new_person->age = age;
-    new_person->addrs_point = add_new_address(street_name, home_num);
+    new_person->address_point = add_new_address(street_name, home_num);
 
     if(list_of_people->head == NULL)
         list_of_people->head = new_person;
@@ -182,55 +261,73 @@ void add_new_person(char *name, unsigned int age, char *street_name, int home_nu
         printf("\nReady! The element is inserted.\n");
 }
 
-/*Функция считывания данных пользователя с консоли*/
-int read_data_from_console()
+/*Функция проверки полученных данных для последующего добавления*/
+int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int call)
 {
-    char name[STRING], age[NUMBER], street_name[STRING], home_num[NUMBER];
+    if(is_correct_string(name) == ERROR)
+        goto false_data;
+
+    int ret_age = get_age_as_number(age);
+    if (ret_age == ERROR)
+        goto false_data;
+
+    if(is_correct_string(street_name) == ERROR)
+        goto false_data;
+
+    int ret_home_num = get_home_num_as_number(home_num);
+    if(ret_home_num == ERROR)
+        goto false_data;
+
+    add_new_person(name, ret_age, street_name, ret_home_num, call);
+
+    return VALID;
+
+false_data:
+    return ERROR;
+}
+
+/*Функция считывания данных пользователя с консоли*/
+int get_data_to_add()
+{
+    char name[STRING_LEN], age[NUMBER_LEN], street_name[STRING_LEN], home_num[NUMBER_LEN];
 
     printf("\nEnter information about the person\n"
-            " Name: ");
-    if(read_data(name, STRING) != VALID)
+            " Name (length from 1 to 63 characters without ','): ");
+    if(read_data(name, STRING_LEN) == ERROR)
         goto false_data;
 
-    printf(" Age: ");
-    if(read_data(age, NUMBER) != VALID)
+    printf(" Age (use only '0123456789', calculated in years): ");
+    if(read_data(age, NUMBER_LEN) == ERROR)
         goto false_data;
 
-    int ret_age = atoi(age);
-    if (ret_age <= 0) // Возраст от 0 лет (младенец)
+    printf("\nEnter the person's address\n Street "
+           "(length from 1 to 63 characters without ','): ");
+    if(read_data(street_name, STRING_LEN) == ERROR)
         goto false_data;
 
-    printf("\nEnter the person's address\n Street: ");
-    if(read_data(street_name, STRING) != VALID)
+    printf(" Нouse number (use only '0123456789', "
+           "no more than seven characters): ");
+    if(read_data(home_num, NUMBER_LEN) == ERROR)
         goto false_data;
 
-    printf(" Нouse number: ");
-    if(read_data(home_num, NUMBER) != VALID)
+    if(add_correct_data_to_database(name, age, street_name, home_num, CONSOLE_CALL) != VALID)
         goto false_data;
-
-    int ret_home_num = atoi(home_num);
-    if(ret_home_num <= 0)
-        goto false_data;
-
-    add_new_person(name, ret_age, street_name, ret_home_num, CONSOLE_CALL);
 
     change_flag++;
 
     return VALID;
 
 false_data:
-    printf("\nIncorrect data! Try again, please.\n");
+    //printf("\nIncorrect data! Try again, please.\n");
     return ERROR;
 }
 
+//________________________________________________________________________ВЫЫВОД БАЗЫ НА ЭКРАН
 /*Вывод списка имен на экран*/
 void view_all_lists()
 {
-    if(list_of_people->head == NULL)
-    {
-        printf("ERROR! No records!\n");
+    if(not_empty_database() == ERROR)
         return;
-    }
 
     people_t *person = list_of_people->head;
     address_t *address = NULL;
@@ -244,7 +341,7 @@ void view_all_lists()
             person->name,
             person->age);
 
-        address = person->addrs_point;
+        address = person->address_point;
 
         printf("Street: %s, House number: %d \n",
             address->street_name,
@@ -259,11 +356,8 @@ void view_all_lists()
 /*Вывод списка адресов на экран*/
 void view_list_of_address()
 {
-    if(list_of_address->head == NULL)
-    {
-        printf("ERROR! No records!\n");
+    if(not_empty_database() == ERROR)
         return;
-    }
 
     address_t *address = list_of_address->head;
 
@@ -283,6 +377,7 @@ void view_list_of_address()
     }
 }
 
+//________________________________________________________________________ПОЛНАЯ ОЧИСТКА БАЗЫ
 /*Очистка списка адресов*/
 int clear_list_of_address()
 {
@@ -348,10 +443,12 @@ int clear_all_lists(int call)
     }
 
     if(call == CONSOLE_CALL)
-        printf("\nERROR! Couldn't delete the database.\n");
+        printf("\nAttention! There is nothing to remove. "
+               "The database is empty.\n");
     return ERROR;
 }
 
+//________________________________________________________________________ПОИСК ЭЛЕМЕНТА
 /*Поиск элемента по частичному совпадению с именем*/
 int search_record_by_name_pattern(char *name)
 {
@@ -373,7 +470,7 @@ int search_record_by_name_pattern(char *name)
                 person->name,
                 person->age);
 
-            address = person->addrs_point;
+            address = person->address_point;
 
             printf("Street: %s, House number: %d \n",
                 address->street_name,
@@ -387,18 +484,9 @@ int search_record_by_name_pattern(char *name)
 }
 
 /*Поиск элемента*/
-void search_record_by_name()
+void search_record_by_name(char *name)
 {
-    if(list_of_people->head == NULL)
-    {
-        printf("ERROR! No records!\n");
-        return;
-    }
-
-    char name[STRING];
-
-    printf("\nEnter a name: ");
-    if(read_data(name, STRING) != VALID)
+    if(not_empty_database() == ERROR)
         return;
 
     people_t *person = list_of_people->head;
@@ -417,7 +505,7 @@ void search_record_by_name()
                 person->name,
                 person->age);
 
-            address = person->addrs_point;
+            address = person->address_point;
 
             printf("Street: %s, House number: %d \n",
                 address->street_name,
@@ -434,26 +522,115 @@ void search_record_by_name()
         printf("There is no such person!\n");
 }
 
-/*Удаление элемента по имени, без затрагивания списка адресов*/
-int delete_record_from_people_list()
+/*Получения корректного имени для дальнейшего поиска в базе*/
+int get_name_to_serch()
 {
-    if(list_of_people->head == NULL)
+    char name[STRING_LEN];
+
+    printf("\nEnter a name "
+           "(length from 1 to 63 characters without ','): ");
+    if(read_data(name, STRING_LEN) == ERROR)
+        goto false_data;
+    if(is_correct_string(name) == ERROR)
+        goto false_data;
+
+    search_record_by_name(name);
+
+    return VALID;
+
+false_data:
+    printf("\nIncorrect data! Try again, please.\n");
+    return ERROR;
+}
+
+//________________________________________________________________________УДАЛЕНИЕ ЭЛЕМЕНТА
+/*Вывод сообщений после работы функции удаления записи*/
+int message_about_delete(int items_deleted)
+{
+    if(items_deleted != 0)
     {
-        printf("ERROR! No records!\n");
-        return ERROR;
+        printf("\n Ready! The person's record deleted.\n");
+        change_flag++;
+
+        return VALID;
     }
 
-    char name[STRING];
+    printf("\nERROR! There is no such person!\n");
+    return ERROR;
+}
 
-    printf("\nEnter a name: ");
-    if(read_data(name, STRING) != VALID)
+/*Проверка на принадлежности адреса человеку*/
+int address_belong_to_people(address_t *address)
+{
+    people_t *person = list_of_people->head;
+
+    while(person != NULL)
     {
-        printf("\nIncorrect data! Try again, please.\n");
-        return ERROR;
+        if(person->address_point == address)
+            return ERROR;
+
+        person = person->next;
     }
+
+    return VALID;
+}
+
+/*Удаление адреса из списка*/
+int delete_address_record(address_t *address)
+{
+    if(address != NULL)
+    {
+        if(address_belong_to_people(address) != VALID)
+            return ERROR;
+    }
+    else
+        return ERROR;
+
+    address_t *delete_address = list_of_address->head;
+
+    while(delete_address != NULL)
+    {
+        if(delete_address == address)
+        {
+            if(delete_address == list_of_address->head)
+            {
+                (delete_address->next)->prev = NULL;
+                list_of_address->head = delete_address->next;
+            }
+            else if(delete_address == list_of_address->tail)
+            {
+                (delete_address->prev)->next = NULL;
+                list_of_address->tail = delete_address->prev;
+            }
+            else
+            {
+                (delete_address->prev)->next = delete_address->next;
+                (delete_address->next)->prev = delete_address->prev;
+            }
+
+            list_of_address->item_counter--;
+
+            free(delete_address->street_name);
+            free(delete_address);
+
+            break;
+        }
+
+        delete_address = delete_address->next;
+    }
+
+    return VALID;
+}
+
+/*Удаление элемента по имени*/
+int delete_person_record(char *name)
+{
+    if(not_empty_database() == ERROR)
+        return ERROR;
 
     people_t *delete_person = list_of_people->head;
     people_t *next_person = NULL;
+    address_t *delete_address = NULL;
 
     int items_deleted = 0;
 
@@ -467,7 +644,7 @@ int delete_record_from_people_list()
             {
                 items_deleted++;
 
-                clear_list_of_people();
+                clear_all_lists(CONSOLE_CALL);
                 break;
             }
             else if(delete_person == list_of_people->head)
@@ -486,8 +663,12 @@ int delete_record_from_people_list()
                 (delete_person->next)->prev = delete_person->prev;
             }
 
+            delete_address = delete_person->address_point;
+
             free(delete_person->name);
             free(delete_person);
+
+            delete_address_record(delete_address);
 
             list_of_people->item_counter--;
             items_deleted++;
@@ -496,124 +677,21 @@ int delete_record_from_people_list()
         delete_person = next_person;
     }
 
-    if(items_deleted != 0)
-    {
-        printf("\n Ready! The person's record deleted.\n");
-        change_flag++;
-
-        return VALID;
-    }
-    else
-    {
-        printf("\nERROR! There is no such person!\n");
-        return ERROR;
-    }
+    return message_about_delete(items_deleted);
 }
 
-/*Проверка на отсутствие связей между адресом и людьми*/
-int check_connect_btwn_address_person(address_t *address)
+/*Получение корректного имени для последующего удаления записи*/
+int get_name_to_delete()
 {
-    people_t *person = list_of_people->head;
+    char name[STRING_LEN];
 
-    int ret = 0;
-
-    while(person != NULL)
-    {
-        if(person->addrs_point == address)
-            ret++;
-
-        person = person->next;
-    }
-
-    return ret;
-}
-
-/*Удаление элемента по имени из списка адресов*/
-int delete_record_from_address_list()
-{
-    if(list_of_address->head == NULL)
-    {
-        printf("ERROR! No records!\n");
-        return ERROR;
-    }
-
-    char street_name[STRING], home_num[NUMBER];
-
-    printf("\nEnter the person's address\n Street: ");
-    if(read_data(street_name, STRING) != VALID)
+    printf("\nEnter a name: ");
+    if(read_data(name, STRING_LEN) == ERROR)
+        goto false_data;
+    if(is_correct_string(name) == ERROR)
         goto false_data;
 
-    printf(" Нouse number: ");
-    if(read_data(home_num, NUMBER) != VALID)
-        goto false_data;
-
-    int ret = atoi(home_num);
-    if(ret <= 0)
-        goto false_data;
-
-    address_t *address = check_address_matches(street_name, ret);
-
-    if(address != NULL)
-    {
-        if(check_connect_btwn_address_person(address) != 0)
-        {
-            printf("\n ERROR! There are people with this address.\n");
-            return ERROR;
-        }
-    }
-    else
-    {
-        printf("\n ERROR! There is no such address!\n");
-        return ERROR;
-    }
-
-    address_t *delete_address = list_of_address->head;
-
-    int items_deleted = 0;
-
-    while(delete_address != NULL)
-    {
-        if(delete_address == address)
-        {
-            if((delete_address == list_of_address->head)&&(delete_address == list_of_address->tail))
-            {
-                items_deleted++;
-
-                clear_list_of_address();
-                break;
-            }
-            else if(delete_address == list_of_address->head)
-            {
-                (delete_address->next)->prev = NULL;
-                list_of_address->head = delete_address->next;
-            }
-            else if(delete_address == list_of_address->tail)
-            {
-                (delete_address->prev)->next = NULL;
-                list_of_address->tail = delete_address->prev;
-            }
-            else
-            {
-                (delete_address->prev)->next = delete_address->next;
-                (delete_address->next)->prev = delete_address->prev;
-            }
-
-            list_of_address->item_counter--;
-            items_deleted++;
-
-            free(delete_address->street_name);
-            free(delete_address);
-
-            break;
-        }
-
-        delete_address = delete_address->next;
-    }
-
-    if(items_deleted != 0)
-        printf("\n Ready! The address deleted.\n");
-
-    change_flag++;
+    delete_person_record(name);
 
     return VALID;
 
@@ -621,7 +699,7 @@ false_data:
     printf("\nIncorrect data! Try again, please.\n");
     return ERROR;
 }
-
+//________________________________________________________________________РАБОТА С ФАЙЛОМ
 /*Функция проверки доступности файла и проверки его содержимого*/
 int read_file(char const *file_path)
 {
@@ -635,43 +713,24 @@ int read_file(char const *file_path)
         return ERROR;
     }
 
-    char str_from_file[128], *name, *age, *street_name, *home_num;
-    int ret_age = 0, ret_home_num = 0;
+    char str_from_file[256], *name, *age, *street_name, *home_num;
 
-    while(fgets(str_from_file, 81, file) != NULL)
+    while(fgets(str_from_file, 145, file) != NULL)
     {
         name = strtok(str_from_file, ",");
-        if(check_data(name, STRING) == ERROR)
-            goto false_data;
-
         age = strtok(NULL, ",");
-        if(check_data(age, NUMBER) == ERROR)
-            goto false_data;
-
-        ret_age = atoi(age);
-        if(ret_age <= 0)
-            goto false_data;
-
         street_name = strtok(NULL, ",");
-        if(check_data(street_name, STRING) == ERROR)
-            goto false_data;
-
         home_num = strtok(NULL, "\n");
-        if(check_data(home_num, NUMBER) == ERROR)
-            goto false_data;
 
-        ret_home_num = atoi(home_num);
-        if(ret_home_num <= 0)
+        if(add_correct_data_to_database(name, age, street_name, home_num, FILE_CALL) != VALID)
             goto false_data;
-
-        add_new_person(name, ret_age, street_name, ret_home_num, FILE_CALL);
     }
 
     fclose(file);
     return VALID;
 
 false_data:
-    printf("\n ERROR! The database contains incorrect data.\n"
+    printf("\n The database contains incorrect data.\n"
            " Please try again later.\n");
 
     clear_all_lists(FILE_CALL);
@@ -697,7 +756,7 @@ int save_to_file(char const *file_path)
 
     while(person != NULL)
     {
-        address = person->addrs_point;
+        address = person->address_point;
         fprintf(file, "%s,%d,%s,%d\n", person->name,
                                        person->age,
                                        address->street_name,
@@ -714,15 +773,16 @@ int save_to_file(char const *file_path)
     return VALID;
 }
 
+//________________________________________________________________________РАБОТА С ПОЛЬЗОВАТЕЛЕМ
 /*Запрос о сохранении базы перед выходом из программы*/
 void question_about_save(char const *file_path)
 {
-    char answer[STRING];
+    char answer[STRING_LEN];
 
     while(1)
     {
         printf("\n Save changes? yes/no\n");
-        read_data(answer, STRING);
+        read_data(answer, STRING_LEN);
 
         if(strcmp(answer,"yes") == 0)
         {
@@ -742,12 +802,10 @@ void question_about_save(char const *file_path)
 /*Функция обработки команды*/
 int processing_of_command_name()
 {
-    char user_message[STRING];
+    char user_message[STRING_LEN];
 
-    if(read_data(user_message, STRING) != VALID)
+    if(read_data(user_message, STRING_LEN) != VALID)
         return ERROR;
-
-    printf("%s\n", user_message);
 
     if(strcmp(user_message,"show commands") == 0)
         return CMD_SHOW_CMD;
@@ -765,10 +823,8 @@ int processing_of_command_name()
         return CMD_GET_ADDRESS_LIST;
     else if (strcmp(user_message,"delete person") == 0)
         return CMD_DELETE_PERSON;
-    else if (strcmp(user_message,"delete address") == 0)
-        return CMD_DELETE_ADDRESS;
     else if (strcmp(user_message,"save database") == 0)
-        return CMD_SAVE_ADDRESS_IN_FILE;
+        return CMD_SAVE_DATABASE_IN_FILE;
 
     return ERROR;
 }
@@ -784,7 +840,6 @@ void command_execution(int cmd_num, char const *file_path)
                    "get persons\n"
                    "delete person\n"
                    "get address\n"
-                   "delete address\n"
                    "save database\n"
                    "delete database\n"
                    "exit\n");
@@ -796,10 +851,10 @@ void command_execution(int cmd_num, char const *file_path)
             clear_all_lists(CONSOLE_CALL);
             break;
         case CMD_ADD_LIST_ITEM: /*Добавление нового элемента*/
-            read_data_from_console();
+            get_data_to_add();
             break;
         case CMD_FIND_RECORD_BY_NAME: /*Поиск элемента*/
-            search_record_by_name();
+            get_name_to_serch();
             break;
         case CMD_EXIT: /*Выход из программы*/
             if(change_flag > 0)
@@ -810,21 +865,16 @@ void command_execution(int cmd_num, char const *file_path)
             view_list_of_address();
             break;
         case CMD_DELETE_PERSON: /*Удаление человека из списка*/
-            delete_record_from_people_list();
+            get_name_to_delete();
             break;
-        case CMD_DELETE_ADDRESS: /*Удаление адреса из списка*/
-            delete_record_from_address_list();
-            break;
-        case CMD_SAVE_ADDRESS_IN_FILE:
+        case CMD_SAVE_DATABASE_IN_FILE:
             save_to_file(file_path);
             break;
         default:
             printf(" Invalid command! Try again, please.\n"
-                   " Enter the 'show cmd' command to view the command reference.\n");
+                   " Enter the 'show commands' command to view the command reference.\n");
             break;
     }
-
-    __fpurge(stdin);
 }
 
 /*Головная фунция*/
