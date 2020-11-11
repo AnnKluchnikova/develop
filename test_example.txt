@@ -46,7 +46,6 @@ find person
 get persons
 delete person
 get address
-delete address
 save database
 delete database
 exit
@@ -60,32 +59,37 @@ rwgerg
 
 РАБОТА С КОМАНДАМИ В ЗАПУЩЕННОЙ ПРОГРАММЕ
 
-КОМАНДА: 
-ФУНКЦИЯ: 
 №1
 КОМАНДА: add person
-ФУНКЦИЯ: add_new_person (также включает add_new_address, check_address_matches)
+ФУНКЦИЯ: get_data_to_add (также включает add_correct_data_to_database) -> add_new_person (также включает add_new_address, get_existing_address)
 
 "Корректные данные"
-Для name и street name: строка не длиннее 31 символов, при этом символ может быть любым, кроме "," или перевода строки, т.е. по сути пустой строки
+Для name и street name: строка не длиннее 63 символов, при этом символ может быть любым, кроме ",". Строка не может быть пустой.
 
 Примеры name :
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 Ann Kluchnikova
 
 Примеры street name:
-qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 O.Koshevoy
 1905 goda
 
-Для age и home number: строка не длиннее 7 символов, при этом это могут быть только цифры. Кроме этого первая цифра не может быть 0.Все числа должны быть положительными.
-Примеры:
+Для age: строка не длиннее 7 символов, но проверяется, что число не привышает значения "149" (лет). При этом могут быть только цифры, а значение "0" будет считаться корректным, так как существует возраст 0 лет (для новорожденных).
+Привер age:
+0
+34
+149
+
+Для home number: строка не длиннее 7 символов, при этом могут быть только цифры. Кроме этого первая цифра не может быть 0, так как номера домов начинаются с 1.
+Примеры home number:
 5555555
 245
+1
 
 №2
 КОМАНДА: find person
-ФУНКЦИЯ: search_record_by_name (также включает search_record_by_name_pattern)
+ФУНКЦИЯ: get_name_to_serch -> search_record_by_name (также включает search_record_by_name_pattern)
 
 "Корректные данные"
 Для name аналогично пункту №1
@@ -98,7 +102,7 @@ O.Koshevoy
 
 №4
 КОМАНДА: delete person
-ФУНКЦИЯ: delete_record_from_people_list
+ФУНКЦИЯ: get_name_to_delete -> delete_person_record(также включает delete_address_record, address_belong_to_people, )
 
 "Корректные данные"
 Для name аналогично пункту №1
@@ -110,27 +114,20 @@ O.Koshevoy
 "Данные не запрашивает"
 
 №6
-КОМАНДА: delete address
-ФУНКЦИЯ: delete_record_from_address_list
-
-"Корректные данные"
-Для street name и home number аналогично пункту №1
-
-№7
 КОМАНДА: save database
 ФУНКЦИЯ: save_to_file
 
 "Данные не запрашивает"
 
-№8
+№7
 КОМАНДА: delete database
 ФУНКЦИЯ: clear_all_lists (также включает clear_list_of_people, clear_list_of_address)
 
 "Данные не запрашивает"
 
-№9
+№8
 КОМАНДА: exit
 ФУНКЦИЯ: нет специальной функции, однако вызывает question_about_save, clear_all_lists
 
 "Корректные данные"
-При исполнении команды у пользователя спрашивается о сохранении данных. Можно ответить yes или no, при этом по умолчанию файл сохранятеся, если пользователь введет что-то отличное от .
+При исполнении команды у пользователя спрашивается о сохранении данных. Можно ответить yes или no, если такой шаблон ответа не получен, то вопрос переспрашивается.
