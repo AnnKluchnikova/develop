@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h> // для free(), calloc()
+#include <string.h> // для strcmp()
 
-#include "f_data_entry.h"
-#include "f_database.h"
-#include "f_database_file.h"
+#include "f_data_entry.h" // setdata
+#include "f_database.h" //lstedit
+#include "f_database_file.h" //filework
 #include "types.h"
 
 #define DEFAULT_FILE "./database.txt"

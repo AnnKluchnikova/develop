@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <stdio_ext.h> // для __fpurge
-#include <stdlib.h>
-#include <string.h>
+#include <stdio_ext.h> // для __fpurge()
+#include <stdlib.h> // для atoi(), free()
+#include <string.h> // для strchr(), strlen()
 
 #include "types.h"
 #include "f_database.h"
