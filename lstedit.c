@@ -3,8 +3,7 @@
 #include <string.h>
 
 #include "types.h"
-#include "f_database.h"
-#include "f_data_entry.h"
+#include "setdata.h"
 //________________________________________________________________________РАБОТА С БАЗОЙ
 /*Проверка базы на непустоту*/
 int not_empty_database()
