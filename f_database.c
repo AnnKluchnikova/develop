@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h> // для free(), calloc()
+#include <string.h> //для strcmp(), strdup(), strlen(), strncasecmp()
 
 #include "types.h"
 #include "f_database.h"
