@@ -4,7 +4,7 @@
 #include <string.h> // для strchr(), strlen()
 
 #include "types.h"
-#include "f_database.h"
+#include "lstedit.h"
 //________________________________________________________________________ЧТЕНИЕ И ОБРАБОТКА ДАННЫХ
 /*Функция для считывания данных*/
 int read_data(char *buf, int data_len)
