@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h> // для free(), calloc()
+#include <stdlib.h>  // для free(), calloc()
 #include <string.h> // для strcmp()
 
 #include "f_data_entry.h" // setdata
