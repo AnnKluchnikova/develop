@@ -2,8 +2,8 @@
 #include <string.h> // для strtok
 
 #include "types.h"
-#include "f_database.h"
-#include "f_data_entry.h"
+#include "lstedit.h"
+#include "setdata.h"
 //________________________________________________________________________РАБОТА С ФАЙЛОМ
 /*Функция проверки доступности файла и проверки его содержимого*/
 int read_file(char const *file_path)
