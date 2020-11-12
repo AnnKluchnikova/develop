@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string.h> // для strtok
+#include <string.h>  // для strtok
 
 #include "types.h"
 #include "lstedit.h"
