@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>  // для free(), calloc()
-#include <string.h> //для strcmp(), strdup(), strlen(), strncasecmp()
+#include <string.h> //для strcmp(), strdup(), strlen(), strncasecmp(), strtok()
 
 #include "types.h"
 #include "setdata.h"
+
 //________________________________________________________________________РАБОТА С БАЗОЙ
 /*Проверка базы на непустоту*/
-int not_empty_database()
+int is_not_empty_database()
 {
     if(list_of_people->head == NULL)
     {
@@ -63,7 +64,7 @@ address_t *add_new_address(char *street_name, int home_num)
 }
 
 /*Добавление записи в список людей*/
-void add_new_person(char *name, unsigned int age, char *street_name, int home_num, int special_label)
+void add_new_person(char *name, unsigned int age, char *street_name, int home_num, int call)
 {
     people_t *new_person = calloc(1,sizeof(people_t));
 
@@ -83,8 +84,33 @@ void add_new_person(char *name, unsigned int age, char *street_name, int home_nu
     
     list_of_people->tail = new_person;
 
-    if(special_label == CONSOLE_CALL)
+    if(call == CONSOLE_CALL)
         printf("\nReady! The element is inserted.\n");
+}
+
+/*Функция проверки полученных данных для последующего добавления*/
+int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int call)
+{
+    if(is_correct_string(name) == ERROR)
+        goto false_data;
+
+    int ret_age = get_age_as_number(age);
+    if (ret_age == ERROR)
+        goto false_data;
+
+    if(is_correct_string(street_name) == ERROR)
+        goto false_data;
+
+    int ret_home_num = get_home_number_as_number(home_num);
+    if(ret_home_num == ERROR)
+        goto false_data;
+
+    add_new_person(name, ret_age, street_name, ret_home_num, call);
+
+    return VALID;
+
+false_data:
+    return ERROR;
 }
 
 /*Функция считывания данных пользователя с консоли*/
@@ -119,7 +145,6 @@ int get_data_to_add()
     return VALID;
 
 false_data:
-    //printf("\nIncorrect data! Try again, please.\n");
     return ERROR;
 }
 
@@ -127,7 +152,7 @@ false_data:
 /*Вывод списка имен на экран*/
 void view_all_lists()
 {
-    if(not_empty_database() == ERROR)
+    if(is_not_empty_database() == ERROR)
         return;
 
     people_t *person = list_of_people->head;
@@ -157,7 +182,7 @@ void view_all_lists()
 /*Вывод списка адресов на экран*/
 void view_list_of_address()
 {
-    if(not_empty_database() == ERROR)
+    if(is_not_empty_database() == ERROR)
         return;
 
     address_t *address = list_of_address->head;
@@ -287,7 +312,7 @@ int search_record_by_name_pattern(char *name)
 /*Поиск элемента*/
 void search_record_by_name(char *name)
 {
-    if(not_empty_database() == ERROR)
+    if(is_not_empty_database() == ERROR)
         return;
 
     people_t *person = list_of_people->head;
@@ -346,7 +371,7 @@ false_data:
 
 //________________________________________________________________________УДАЛЕНИЕ ЭЛЕМЕНТА
 /*Вывод сообщений после работы функции удаления записи*/
-int message_about_delete(int items_deleted)
+int show_message_about_delete(int items_deleted)
 {
     if(items_deleted != 0)
     {
@@ -361,7 +386,7 @@ int message_about_delete(int items_deleted)
 }
 
 /*Проверка на принадлежности адреса человеку*/
-int address_belong_to_people(address_t *address)
+int search_address_belong_to_people(address_t *address)
 {
     people_t *person = list_of_people->head;
 
@@ -381,7 +406,7 @@ int delete_address_record(address_t *address)
 {
     if(address != NULL)
     {
-        if(address_belong_to_people(address) != VALID)
+        if(search_address_belong_to_people(address) != VALID)
             return ERROR;
     }
     else
@@ -426,7 +451,7 @@ int delete_address_record(address_t *address)
 /*Удаление элемента по имени*/
 int delete_person_record(char *name)
 {
-    if(not_empty_database() == ERROR)
+    if(is_not_empty_database() == ERROR)
         return ERROR;
 
     people_t *delete_person = list_of_people->head;
@@ -478,7 +503,7 @@ int delete_person_record(char *name)
         delete_person = next_person;
     }
 
-    return message_about_delete(items_deleted);
+    return show_message_about_delete(items_deleted);
 }
 
 /*Получение корректного имени для последующего удаления записи*/
@@ -499,4 +524,84 @@ int get_name_to_delete()
 false_data:
     printf("\nIncorrect data! Try again, please.\n");
     return ERROR;
+}
+
+//________________________________________________________________________РАБОТА С ФАЙЛОМ
+/*Функция проверки доступности файла и проверки его содержимого*/
+int read_file(char const *file_path)
+{
+    FILE *file;
+
+    file = fopen(file_path, "r");
+    if(file == NULL)
+    {
+        printf("\n Сouldn't open the file!\n"
+               " Please try again later.\n");
+        return ERROR;
+    }
+
+    char file_string[FILE_STRING_LEN], *name, *age, *street_name, *home_num;
+    int string_counter = 0;
+
+    while(fgets(file_string, FILE_STRING_LEN, file) != NULL)
+    {
+        string_counter++;
+
+        name = strtok(file_string, ",");
+        age = strtok(NULL, ",");
+        street_name = strtok(NULL, ",");
+        home_num = strtok(NULL, "\n");
+
+        if(add_correct_data_to_database(name, age, street_name, home_num, FILE_CALL) != VALID)
+            goto false_data;
+    }
+
+    fclose(file);
+
+    printf("\n Ready! %d lines of data received.\n", string_counter);
+
+    return VALID;
+
+false_data:
+    printf("\n Invalid data in line: %d\n"
+           " Please correct the data and try again.\n", string_counter);
+
+    clear_all_lists(FILE_CALL);
+    fclose(file);
+
+    return ERROR;
+}
+
+/*Функция сохранения изменений в файл*/
+int save_to_file(char const *file_path)
+{
+    FILE *file;
+    file = fopen(file_path,"w");
+
+    if(file == NULL)
+    {
+        printf("ERROR! Failed to save!\n");
+        return ERROR;
+    }
+
+    people_t *person = list_of_people->head;
+    address_t *address = NULL;
+
+    while(person != NULL)
+    {
+        address = person->address_point;
+        fprintf(file, "%s,%d,%s,%d\n", person->name,
+                                       person->age,
+                                       address->street_name,
+                                       address->home_num);
+
+        person = person->next;
+    }
+
+    fclose(file);
+
+    printf("Changes are saved to a file %s\n", file_path);
+    change_flag = 0;
+
+    return VALID;
 }

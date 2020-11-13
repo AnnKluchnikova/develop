@@ -4,7 +4,7 @@
 #include <string.h> // для strchr(), strlen()
 
 #include "types.h"
-#include "lstedit.h"
+
 //________________________________________________________________________ЧТЕНИЕ И ОБРАБОТКА ДАННЫХ
 /*Функция для считывания данных*/
 int read_data(char *buf, int data_len)
@@ -68,21 +68,6 @@ false_data:
     return ERROR;
 }
 
-/*Функция для распознования возраста "0 лет"*/
-int zero_is_age(char *buf)
-{
-    int index = 0;
-
-    while(index < strlen(buf))
-    {
-        if(buf[index] == '0')
-            return VALID;
-        index++;
-    }
-
-    return ERROR;
-}
-
 /*Функция для преобразования возраста из строки в число*/
 int get_age_as_number(char *buf)
 {
@@ -91,10 +76,10 @@ int get_age_as_number(char *buf)
 
     int get_number = atoi(buf);
 
-    if((get_number > 0)&&(get_number < 150)) // Самому старому человеку в мире было 145 лет
+    if((get_number > 0)&&(get_number < MAX_AGE))
         return get_number;
     else if(get_number == 0)        // Возраст "0" соответсвует младенцу,
-        if(zero_is_age(buf) == VALID)  // не достигшему возраста 1 год
+        if(strcmp(buf, "0") == 0)  // не достигшему возраста 1 год
             return get_number;
 
     printf("\nERROR! Age doesn't match the real one.\n");
@@ -102,9 +87,12 @@ int get_age_as_number(char *buf)
 }
 
 /*Функция для преобразования номера дома из строки в число*/
-int get_home_num_as_number(char *buf)
+int get_home_number_as_number(char *buf)
 {
     if(is_not_null_string(buf) != VALID)
+        goto false_data;
+
+    if(strlen(buf) >= NUMBER_LEN)
         goto false_data;
 
     int get_number = atoi(buf);
@@ -114,30 +102,5 @@ int get_home_num_as_number(char *buf)
 
 false_data:
     printf("\nERROR! House number doesn't match the real one.\n");
-    return ERROR;
-}
-
-/*Функция проверки полученных данных для последующего добавления*/
-int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int call)
-{
-    if(is_correct_string(name) == ERROR)
-        goto false_data;
-
-    int ret_age = get_age_as_number(age);
-    if (ret_age == ERROR)
-        goto false_data;
-
-    if(is_correct_string(street_name) == ERROR)
-        goto false_data;
-
-    int ret_home_num = get_home_num_as_number(home_num);
-    if(ret_home_num == ERROR)
-        goto false_data;
-
-    add_new_person(name, ret_age, street_name, ret_home_num, call);
-
-    return VALID;
-
-false_data:
     return ERROR;
 }

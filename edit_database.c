@@ -3,8 +3,7 @@
 #include <string.h> // для strcmp()
 
 #include "setdata.h"
-#include "lstedit.h"
-#include "filework.h"
+#include "listedit.h"
 #include "types.h"
 
 #define DEFAULT_FILE "./database.txt"
@@ -21,9 +20,8 @@ enum CMD {
     CMD_SAVE_DATABASE_IN_FILE,
 };
 
-//________________________________________________________________________РАБОТА С ПОЛЬЗОВАТЕЛЕМ
 /*Запрос о сохранении базы перед выходом из программы*/
-void question_about_save(char const *file_path)
+void ask_question_about_save(char const *file_path)
 {
     char answer[STRING_LEN];
 
@@ -47,8 +45,9 @@ void question_about_save(char const *file_path)
     }
 }
 
-/*Функция обработки команды*/
-int processing_of_command_name()
+/*Функция обработки команды, которая запрашивает имя команды 
+и возвращает ее номер-макрос для выполнение*/
+int process_command_name()
 {
     char user_message[STRING_LEN];
 
@@ -77,7 +76,9 @@ int processing_of_command_name()
     return ERROR;
 }
 
-void command_execution(int cmd_num, char const *file_path)
+/*Функция выполнения команды, которая получает номер-макрос команды
+и вызывает соответствующие функции*/
+void execute_command(int cmd_num, char const *file_path)
 {
     switch(cmd_num)
     {
@@ -106,7 +107,7 @@ void command_execution(int cmd_num, char const *file_path)
             break;
         case CMD_EXIT: /*Выход из программы*/
             if(change_flag > 0)
-                question_about_save(file_path);
+                ask_question_about_save(file_path);
             clear_all_lists(FILE_CALL);
             break;
         case CMD_GET_ADDRESS_LIST: /*Вывод адресов*/
@@ -125,7 +126,7 @@ void command_execution(int cmd_num, char const *file_path)
     }
 }
 
-/*Головная фунция*/
+/*Головная фунция, которой может передаваться путь до файла при запуске программы*/
 int main(int argc, char const *argv[])
 {
     char const *file_path;
@@ -151,8 +152,8 @@ int main(int argc, char const *argv[])
     while(cmd_num != CMD_EXIT)
     {
         printf("\n >");
-        cmd_num = processing_of_command_name();
-        command_execution(cmd_num, file_path);
+        cmd_num = process_command_name();
+        execute_command(cmd_num, file_path);
     }
 
 no_file:
