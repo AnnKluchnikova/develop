@@ -16,7 +16,4 @@ int zero_is_age(char *buf);
 int get_age_as_number(char *buf);
 
 /*Функция для преобразования номера дома из строки в число*/
-int get_home_num_as_number(char *buf);
-
-/*Функция проверки полученных данных для последующего добавления*/
-int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int call);
+int get_home_number_as_number(char *buf);

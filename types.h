@@ -2,6 +2,8 @@
 
 #define STRING_LEN 64
 #define NUMBER_LEN 8
+#define MAX_AGE 150  // Самому старому человеку в мире было 145 лет
+#define FILE_STRING_LEN 256
 
 int change_flag;  // Счетчик изменений для запроса сохранения в файл,
                        // если произошли какие-то изменения устанавливается флаг

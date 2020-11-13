@@ -1,4 +1,5 @@
 #pragma once
+
 #include "types.h"
 
 /*Проверка базы на непустоту*/
@@ -12,6 +13,9 @@ address_t *add_new_address(char *street_name, int home_num);
 
 /*Добавление записи в список людей*/
 void add_new_person(char *name, unsigned int age, char *street_name, int home_num, int special_label);
+
+/*Функция проверки полученных данных для последующего добавления*/
+int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int call);
 
 /*Функция считывания данных пользователя с консоли*/
 int get_data_to_add();
@@ -55,3 +59,8 @@ int delete_person_record(char *name);
 /*Получение корректного имени для последующего удаления записи*/
 int get_name_to_delete();
 
+/*Функция проверки доступности файла и проверки его содержимого*/
+int read_file(char const *file_path);
+
+/*Функция сохранения изменений в файл*/
+int save_to_file(char const *file_path);
