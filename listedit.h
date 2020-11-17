@@ -53,7 +53,7 @@ int address_belong_to_people(address_t *address);
 /*Удаление адреса из списка*/
 int delete_address_record(address_t *address);
 
-/*Удаление элемента из списка по имени*/
+/*Удаление элемента по имени*/
 int delete_person_record(char *name);
 
 /*Получение корректного имени для последующего удаления записи*/
