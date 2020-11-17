@@ -5,6 +5,10 @@
 #include "types.h"
 #include "setdata.h"
 
+#define FILE_STRING_LEN 256 // Длинна строки, считываемая из файла
+#define NUM_FIRST_LINE 1 // В стандартных редакторах нумерация строк начинается с "1"
+
+
 //________________________________________________________________________РАБОТА С БАЗОЙ
 /*Проверка базы на непустоту*/
 int is_not_empty_database()
@@ -64,7 +68,7 @@ address_t *add_new_address(char *street_name, int home_num)
 }
 
 /*Добавление записи в список людей*/
-void add_new_person(char *name, unsigned int age, char *street_name, int home_num, int call)
+void add_new_person(char *name, unsigned int age, char *street_name, int home_num, int show_message)
 {
     people_t *new_person = calloc(1,sizeof(people_t));
 
@@ -84,12 +88,12 @@ void add_new_person(char *name, unsigned int age, char *street_name, int home_nu
     
     list_of_people->tail = new_person;
 
-    if(call == CONSOLE_CALL)
+    if(show_message == NEED_MESSAGE)
         printf("\nReady! The element is inserted.\n");
 }
 
 /*Функция проверки полученных данных для последующего добавления*/
-int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int call)
+int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int show_message)
 {
     if(is_correct_string(name) == ERROR)
         goto false_data;
@@ -105,7 +109,7 @@ int add_correct_data_to_database(char *name, char *age, char *street_name, char 
     if(ret_home_num == ERROR)
         goto false_data;
 
-    add_new_person(name, ret_age, street_name, ret_home_num, call);
+    add_new_person(name, ret_age, street_name, ret_home_num, show_message);
 
     return VALID;
 
@@ -137,7 +141,7 @@ int get_data_to_add()
     if(read_data(home_num, NUMBER_LEN) == ERROR)
         goto false_data;
 
-    if(add_correct_data_to_database(name, age, street_name, home_num, CONSOLE_CALL) != VALID)
+    if(add_correct_data_to_database(name, age, street_name, home_num, NEED_MESSAGE) != VALID)
         goto false_data;
 
     change_flag++;
@@ -158,7 +162,7 @@ void view_all_lists()
     people_t *person = list_of_people->head;
     address_t *address = NULL;
 
-    int index = 0;
+    int index = NUM_FIRST_LINE;
 
     while(person != NULL)
     {
@@ -187,7 +191,7 @@ void view_list_of_address()
 
     address_t *address = list_of_address->head;
 
-    int index = 0;
+    int index = NUM_FIRST_LINE;
 
     while(address != NULL)
     {
@@ -251,7 +255,7 @@ int clear_list_of_people()
 }
 
 /*Полная очистка списка*/
-int clear_all_lists(int call)
+int clear_all_lists(int show_message)
 {
     int ret_clear_people = -1, ret_clear_address = -1;
 
@@ -260,7 +264,7 @@ int clear_all_lists(int call)
 
     if((ret_clear_people == VALID)&&(ret_clear_address == VALID))
     {
-        if(call == CONSOLE_CALL)
+        if(show_message == NEED_MESSAGE)
             printf("\nReady! Database deleted.\n");
 
         change_flag++;
@@ -268,7 +272,7 @@ int clear_all_lists(int call)
         return VALID;
     }
 
-    if(call == CONSOLE_CALL)
+    if(show_message == NEED_MESSAGE)
         printf("\nAttention! There is nothing to remove. "
                "The database is empty.\n");
     return ERROR;
@@ -285,7 +289,7 @@ int search_record_by_name_pattern(char *name)
 
     int len = strlen(name);
 
-    for(int index = 0; index < list_of_people->item_counter; index++)
+    for(int index = NUM_FIRST_LINE; index < list_of_people->item_counter; index++)
     {
         if(strncasecmp(name, person->name, len) == 0)
         {
@@ -470,7 +474,7 @@ int delete_person_record(char *name)
             {
                 items_deleted++;
 
-                clear_all_lists(CONSOLE_CALL);
+                clear_all_lists(NEED_MESSAGE);
                 break;
             }
             else if(delete_person == list_of_people->head)
@@ -552,7 +556,7 @@ int read_file(char const *file_path)
         street_name = strtok(NULL, ",");
         home_num = strtok(NULL, "\n");
 
-        if(add_correct_data_to_database(name, age, street_name, home_num, FILE_CALL) != VALID)
+        if(add_correct_data_to_database(name, age, street_name, home_num, NO_MESSAGE) != VALID)
             goto false_data;
     }
 
@@ -566,7 +570,7 @@ false_data:
     printf("\n Invalid data in line: %d\n"
            " Please correct the data and try again.\n", string_counter);
 
-    clear_all_lists(FILE_CALL);
+    clear_all_lists(NO_MESSAGE);
     fclose(file);
 
     return ERROR;
