@@ -5,6 +5,8 @@
 
 #include "types.h"
 
+#define MAX_AGE 150  // Самому старому человеку в мире было 145 лет
+
 //________________________________________________________________________ЧТЕНИЕ И ОБРАБОТКА ДАННЫХ
 /*Функция для считывания данных*/
 int read_data(char *buf, int data_len)
@@ -90,7 +92,7 @@ int get_age_as_number(char *buf)
 int get_home_number_as_number(char *buf)
 {
     if(is_not_null_string(buf) != VALID)
-        goto false_data;
+        return ERROR;
 
     if(strlen(buf) >= NUMBER_LEN)
         goto false_data;
