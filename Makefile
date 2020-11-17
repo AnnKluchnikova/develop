@@ -1,3 +1,3 @@
-task: edit_database.c
-	gcc -Wall -g edit_database.c setdata.c listedit.c -o edit
+task: main.c
+	gcc -Wall -g main.c setdata.c listedit.c commands.c -o edit
 	#./edit
