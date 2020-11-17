@@ -2,20 +2,31 @@
 
 #define STRING_LEN 64
 #define NUMBER_LEN 8
-#define MAX_AGE 150  // Самому старому человеку в мире было 145 лет
-#define FILE_STRING_LEN 256
 
+extern char const *file_path;
 int change_flag;  // Счетчик изменений для запроса сохранения в файл,
                        // если произошли какие-то изменения устанавливается флаг
 
-enum CALL {        // Если вызов функции произошел с консоли,
-    FILE_CALL,    // то по завршению ее выполнения  в консоле
-    CONSOLE_CALL // будет выведено соответсвующее сообщение,
+enum MESSAGE {        // Если вызов функции произошел с консоли,
+    NEED_MESSAGE,    // то по завршению ее выполнения  в консоле
+    NO_MESSAGE // будет выведено соответсвующее сообщение,
 };              // а если из файла, то сообщений от функций не будет
 
 enum EXIT_FUNC {
     ERROR = -1,
     VALID
+};
+
+enum CMD{
+    CMD_SHOW_CMD,
+    CMD_GET_ALL_LISTS,
+    CMD_CLEAR_ALL_LISTS,
+    CMD_ADD_LIST_ITEM,
+    CMD_FIND_RECORD_BY_NAME,
+    CMD_EXIT,
+    CMD_GET_ADDRESS_LIST,
+    CMD_DELETE_PERSON,
+    CMD_SAVE_DATABASE_IN_FILE
 };
 
 typedef struct address_s
