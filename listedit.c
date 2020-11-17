@@ -11,7 +11,7 @@
 
 //________________________________________________________________________РАБОТА С БАЗОЙ
 /*Проверка базы на непустоту*/
-int is_not_empty_database()
+int is_not_empty_database(void)
 {
     if(list_of_people->head == NULL)
     {
@@ -118,7 +118,7 @@ false_data:
 }
 
 /*Функция считывания данных пользователя с консоли*/
-int get_data_to_add()
+int get_data_to_add(void)
 {
     char name[STRING_LEN], age[NUMBER_LEN], street_name[STRING_LEN], home_num[NUMBER_LEN];
 
@@ -154,7 +154,7 @@ false_data:
 
 //________________________________________________________________________ВЫЫВОД БАЗЫ НА ЭКРАН
 /*Вывод списка имен на экран*/
-void view_all_lists()
+void view_all_lists(void)
 {
     if(is_not_empty_database() == ERROR)
         return;
@@ -184,7 +184,7 @@ void view_all_lists()
 }
 
 /*Вывод списка адресов на экран*/
-void view_list_of_address()
+void view_list_of_address(void)
 {
     if(is_not_empty_database() == ERROR)
         return;
@@ -209,7 +209,7 @@ void view_list_of_address()
 
 //________________________________________________________________________ПОЛНАЯ ОЧИСТКА БАЗЫ
 /*Очистка списка адресов*/
-int clear_list_of_address()
+int clear_list_of_address(void)
 {
     if(list_of_address->head == NULL)
         return ERROR;
@@ -232,7 +232,7 @@ int clear_list_of_address()
 }
 
 /*Очистка списка людей*/
-int clear_list_of_people()
+int clear_list_of_people(void)
 {
     if(list_of_people->head == NULL)
         return ERROR;
@@ -353,7 +353,7 @@ void search_record_by_name(char *name)
 }
 
 /*Получения корректного имени для дальнейшего поиска в базе*/
-int get_name_to_serch()
+int get_name_to_serch(void)
 {
     char name[STRING_LEN];
 
@@ -511,7 +511,7 @@ int delete_person_record(char *name)
 }
 
 /*Получение корректного имени для последующего удаления записи*/
-int get_name_to_delete()
+int get_name_to_delete(void)
 {
     char name[STRING_LEN];
 
