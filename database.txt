@@ -8,5 +8,4 @@ Marina Kuksa,43,Jeleznodorojnaya,17
 Vadim Vender,36,Krasniy,56
 Vladimir Kluchnikov,21,O.Koshevoy,27
 Boris Ford,56,Rew,3
-kertf,6,wteyu,7
 Rita Orlova,31,Titova,6
