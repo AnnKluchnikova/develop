@@ -9,9 +9,6 @@ int is_not_null_string(char *buf);
 /*Функция проверки строковых данных на корректность*/
 int is_correct_string(char *buf);
 
-/*Функция для распознования возраста "0 лет"*/
-int zero_is_age(char *buf);
-
 /*Функция для преобразования возраста из строки в число*/
 int get_age_as_number(char *buf);
 
