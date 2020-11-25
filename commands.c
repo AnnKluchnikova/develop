@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <string.h> // для strcmp()
+#include <signal.h> // для raise()
 
 #include "setdata.h"
 #include "listedit.h"
 #include "types.h"
+
+#define PRESSED_ENTER -2
 
 /*Запрос о сохранении базы перед выходом из программы*/
 void ask_question_about_save(char const *file_path)
@@ -57,6 +60,8 @@ int process_command_name(void)
         return CMD_DELETE_PERSON;
     else if (strcmp(user_message,"save database") == 0)
         return CMD_SAVE_DATABASE_IN_FILE;
+    else if (strcmp(user_message, "") == 0)
+        return PRESSED_ENTER;
 
     return ERROR;
 }
@@ -103,6 +108,9 @@ void execute_command(int cmd_num, char const *file_path)
             break;
         case CMD_SAVE_DATABASE_IN_FILE:
             save_to_file(file_path);
+            break;
+        case PRESSED_ENTER:
+            //raise(SIGUSR2);
             break;
         default:
             printf(" Invalid command! Try again, please.\n"
