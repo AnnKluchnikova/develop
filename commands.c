@@ -5,6 +5,7 @@
 #include "setdata.h"
 #include "listedit.h"
 #include "types.h"
+#include "getjson.h"
 
 #define PRESSED_ENTER -2
 
@@ -20,7 +21,7 @@ void ask_question_about_save(char const *file_path)
 
         if(strcmp(answer,"yes") == 0)
         {
-            save_to_file(file_path);
+            write_data_to_json_file(file_path);
             break;
         }
         else if (strcmp(answer,"no") == 0)
@@ -107,10 +108,9 @@ void execute_command(int cmd_num, char const *file_path)
             get_name_to_delete();
             break;
         case CMD_SAVE_DATABASE_IN_FILE:
-            save_to_file(file_path);
+            write_data_to_json_file(file_path);
             break;
         case PRESSED_ENTER:
-            //raise(SIGUSR2);
             break;
         default:
             printf(" Invalid command! Try again, please.\n"
