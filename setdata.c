@@ -56,9 +56,10 @@ int is_correct_string(char *buf)
     if(is_not_null_string(buf) != VALID)
         return ERROR;
 
-    if(strchr(buf, ',') != NULL)    // Запятая является разделителем между разными данными в файле
+    /*if(strchr(buf, ',') != NULL)    // Запятая является разделителем между разными данными в файле
         goto false_data;           // Если она окажется в принимаемой строке, то при сохранении в файл и
                                   // считывании из этого файла данные будут восприниматься не корректно
+*/ // ATTANTION Если используется файл формат json, то это действие не нужно
 
     if(strlen(buf) >= STRING_LEN)
         goto false_data;
@@ -80,7 +81,7 @@ int get_age_as_number(char *buf)
 
     if((get_number > 0)&&(get_number < MAX_AGE))
         return get_number;
-    else if(get_number == 0)        // Возраст "0" соответсвует младенцу,
+    else if(get_number == 0)        // Возраст "0" соответсвует ребенку,
         if(strcmp(buf, "0") == 0)  // не достигшему возраста 1 год
             return get_number;
 
