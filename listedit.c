@@ -166,14 +166,14 @@ void view_all_lists(void)
 
     while(person != NULL)
     {
-        printf("%d. Name: %s, Age: %u ",
+        printf("%d. Name: %s\tAge: %u\t",
             index,
             person->name,
             person->age);
 
         address = person->address_point;
 
-        printf("Street: %s, House number: %d \n",
+        printf("Street: %s \tHouse number: %d \n",
             address->street_name,
             address->home_num);
 
@@ -196,7 +196,7 @@ void view_list_of_address(void)
     while(address != NULL)
     {
 
-        printf("%d. Street: %s, House number: %d \n",
+        printf("%d. Street: %s\tHouse number: %d \n",
             index,
             address->street_name,
             address->home_num);
@@ -531,8 +531,23 @@ false_data:
 }
 
 //________________________________________________________________________РАБОТА С ФАЙЛОМ
-/*Функция проверки доступности файла и проверки его содержимого*/
-int read_file(char const *file_path)
+/*
+*Функции read_file и save_to_file предназначены для работы с текстовыми файлами.
+*Однако функции работают со своим форматом представления данных. Корректными будут
+*считаться только не пустые строки в файле типа:
+*
+*012345678901234567890123456789012345678901234567890123456789012,149,012345678901234567890123456789012345678901234567890123456789012,1234567
+*Ann Kluchnikova,21,O.Koshevoy,27
+*,wret,56,sety,45                 // будет считано wret 56 sety 45
+*Пустой файл
+*
+*Такие данные функция read_file может считать и записать во внутреннюю структуру программы.
+При этом функци save_to_file будет сохранять данные из внутренней структуры в виде:
+"Ann Kluchnikova,21,O.Koshevoy,27" (без кавычек), где запятая является разделителем
+*/
+
+/*Функция проверки доступности файла и проверки/записи его содержимого*/
+/*int read_file(char const *file_path)
 {
     FILE *file;
 
@@ -574,10 +589,10 @@ false_data:
     fclose(file);
 
     return ERROR;
-}
+}*/
 
 /*Функция сохранения изменений в файл*/
-int save_to_file(char const *file_path)
+/*int save_to_file(char const *file_path)
 {
     FILE *file;
     file = fopen(file_path,"w");
@@ -608,4 +623,4 @@ int save_to_file(char const *file_path)
     change_flag = 0;
 
     return VALID;
-}
+}*/
