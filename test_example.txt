@@ -3,38 +3,62 @@
 НАЧАЛЬНЫЙ ВАРИАНТ ФАЙЛА
 
 ***Формат файла***
-database.txt
-database
+database.json
+
+***Пример оформления корректных записей**
+{
+    "1":
+    {
+            "Name":"Ann Kluchnikova",
+            "Age": "21",
+            "Address":
+            {
+                "Street Name":"O.Koshevoy",
+                "Home Number":"12"
+            }
+    },
+    "2":
+    {
+            "Name":"Kan Vladimir",
+            "Age":"22",
+            "Address":
+            {
+                "Street Name":"Morskaya",
+                "Home Number":"89"
+            }
+    }
+}
+
+Только пустой объект в файле: {}
 
 ***Формат данных в файле***
 "Корректный"
-012345678901234567890123456789,123456,012345678901234567890123456789,123456
-Ann Kluchnikova,21,O.Koshevoy,27
-,wret,56,sety,45                 // будет считано wret 56 sety 45
-Пустой файл
+"Name": "012345678901234567890123456789" или "Ann Kluchnikova"
+"Age": "149"
+"Street Name": "O.Koshevoy", "wret"
+"Home Number":"12"
 
 "Не корректный"
-пустая строка
-Ann Kluchnikova,21,O.Koshevoy,27, ugfg,arfy,6,4,
-Ann Kluchnikova 21 O.Koshevoy 27
-21,Ann Kluchnikova,O.Koshevoy,27
-Ann,five,Krasniy,8
-Ann,5,Krasniy,eight
-Ann,five,Krasniy,eight
- , ,O.Koshevoy,27
-21,21,21,21
-21 21 21 21
-Ann Kluchnikova,21, , 
-              ,23,tg,56
+Пустой файл
+
+Пустые значения:
+"": "012345678901234567890123456789" или "Name": ""
+"Age": "не число" или/и "Home Number":"не число"
+
+Пустой вложенный объект
+{
+    "1":
+    {}
+}
 
 РАБОТА С КОНСОЛЬЮ
 
 ***Запуск программы через консоль***
 ./edit
-./edit ./database.txt
-./edir /home/ann/mygit/develop/database.txt 
+./edit ./database.json
+./edir /home/ann/mygit/develop/database.json 
 ./edit 5 56 7 3578 wefer
-./edit ./database.txt ./database_1.txt ./database_2.txt
+./edit ./database.json ./database_1.json ./database_2.json
 ./edit ./не_существующий_файл
 ./edir /home/ann/mygit/develop/не_существующий_файл
 
@@ -115,7 +139,7 @@ O.Koshevoy
 
 №6
 КОМАНДА: save database
-ФУНКЦИЯ: save_to_file
+ФУНКЦИЯ: write_data_to_json_file
 
 "Данные не запрашивает"
 
