@@ -3,10 +3,10 @@
 #include <signal.h> // для signal(), для raise()
 
 #include "commands.h"
-#include "listedit.h"
 #include "types.h"
+#include "getjson.h"
 
-#define DEFAULT_FILE "./database.txt"
+#define DEFAULT_FILE "./database.json"
 
 unsigned char exit_flag = 0; // Флаг выхода из программы по сигналу Ctrl+C
 char const *file_path;      // Путь до файла, с данными которого будет работать программа
@@ -25,7 +25,28 @@ void signal_handler(int signo)
         printf("Received SIGUSR2!\n");
 }
 
-/*Головная фунция, которой может передаваться путь до файла при запуске программы*/
+/*Функция проверки доступности файла на чтение и запись.
+Пользователю должны быть доступны все функции программы, в частности
+редактирование данных и сохранение их в файл. Для этого необходимо иметь доступ к файлу
+для чтения его данных и записи в него новых*/
+int check_file_access(char const *file_path)
+{
+    FILE *file;
+
+    file = fopen(file_path, "r+");
+    if(file == NULL)
+    {
+        printf("\n The file \"%s\" is not open!\n"
+               " Please сheck access rights.\n", file_path);
+        return ERROR;
+    }
+
+    fclose(file);
+
+    return VALID;
+}
+
+/*Головная фунция, которая может принять и обработать путь до файла при запуске программы*/
 int main(int argc, char const *argv[])
 {
     if(argc == 2)
@@ -36,8 +57,16 @@ int main(int argc, char const *argv[])
     list_of_people = calloc(1,sizeof(list_people_t));
     list_of_address = calloc(1,sizeof(list_address_t));
 
-    if(read_file(file_path) != VALID)
-        goto no_file;
+    /*if(read_file(file_path) != VALID) // Предназначено для открытия и считывания информации
+        goto no_file;*/                // из файла в специальном формате записи данных (см. listedit.c)
+                                      // Чтобы использовать этот код, необходимо раскомментировать функцию
+                                     // read_file, а также save_to_file, в файле listedit.c и их определение в listedit.h
+
+    if(check_file_access(file_path) != VALID)
+        goto error;
+
+    if(add_json_object_to_database(file_path) != VALID)
+        goto error;
 
     printf("\n*** Welcome to the people database editor! ***\n"
            " You are editing a file: %s\n"
@@ -57,7 +86,7 @@ int main(int argc, char const *argv[])
         execute_command(cmd_num, file_path);
     }
 
-no_file:
+error:
     free(list_of_people);
     free(list_of_address);
 
