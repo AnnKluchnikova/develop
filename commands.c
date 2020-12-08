@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h> // для strcmp()
-#include <signal.h> // для raise()
 
 #include "setdata.h"
 #include "listedit.h"
@@ -21,6 +20,9 @@ void ask_question_about_save(char const *file_path)
 
         if(strcmp(answer,"yes") == 0)
         {
+            //save_to_file(file_path);      // Раскоммент., когда нужно будет использовать
+                                           // файл с форматом .txt, при этом раскоммент. save_to_file
+                                          // и read_file в файле listedit.h
             write_data_to_json_file(file_path);
             break;
         }
