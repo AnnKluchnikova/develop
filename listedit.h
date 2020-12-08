@@ -3,7 +3,7 @@
 #include "types.h"
 
 /*Функция проверки полученных данных для последующего добавления*/
-int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, int show_message);
+int add_correct_data_to_database(char *name, char *age, char *street_name, char *home_num, message show_message);
 
 /*Функция считывания данных пользователя с консоли*/
 int get_data_to_add(void);
@@ -15,7 +15,7 @@ void view_all_lists(void);
 void view_list_of_address(void);
 
 /*Полная очистка списка*/
-int clear_all_lists(int show_message);
+int clear_all_lists(message show_message);
 
 /*Получения корректного имени для дальнейшего поиска в базе*/
 int get_name_to_serch(void);
